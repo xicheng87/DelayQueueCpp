@@ -1,0 +1,15 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+cc_library(
+    name = "semaphore",
+    hdrs = ["semaphore.h"],
+    srcs = ["semaphore.cc"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "delay_queue",
+    hdrs = ["delay_queue.h"],
+    visibility = ["//visibility:public"],
+    deps = ["//src:semaphore"]
+)

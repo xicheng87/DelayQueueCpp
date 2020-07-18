@@ -1,0 +1,19 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+cc_test(
+    name = "sanity_check",
+    srcs = ["sanity_check.cc"],
+    deps = [
+      "//src:delay_queue",  
+      "@com_google_test//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "semaphore_unit_test",
+    srcs = ["semaphore_unit_test.cc"],
+    deps = [
+      "//src:semaphore",  
+      "@com_google_test//:gtest_main",
+    ],
+)
