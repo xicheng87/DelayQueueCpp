@@ -4,8 +4,8 @@
 #ifndef SEMAPHORE_H_
 #define SEMAPHORE_H_
 
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 
 // Definition of a Semaphore class that one can use for notifying, wait and
 // and wait for a period of time. Because C++ does not have a built-in semaphore
