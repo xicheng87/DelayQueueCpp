@@ -1,3 +1,7 @@
+// Copyright (c) 2020 Xi Cheng. All rights reserved.
+// Use of this source code is governed by a Apache License 2.0 that can be
+// found in the LICENSE file.
+
 #include "gtest/gtest.h"
 #include "src/delay_queue.h"
 
