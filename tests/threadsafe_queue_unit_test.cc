@@ -18,7 +18,7 @@ class ThreadSafeQueueUnitTest : public ::testing::Test {
 // in the consumers. Otherwise, call TryPop in the consumers so that they
 // do not block. Record the returned false and verify that 
 void producuer_consumer_test(int num_producer, int num_consumer) {
-  threadsafe_queue<int> t_queue;
+  ThreadsafeQueue<int> t_queue;
   std::vector<std::thread> threads; 
   bool const less_producer(num_producer < num_consumer);
   std::atomic<int> num_try_pop_fail{0};
@@ -50,9 +50,9 @@ void producuer_consumer_test(int num_producer, int num_consumer) {
             less_producer ? num_consumer - num_producer : 0);
 }
 
-// Initialize a threadsafe_queue, use it in a single-thread situation 
+// Initialize a ThreadsafeQueue, use it in a single-thread situation 
 TEST_F(ThreadSafeQueueUnitTest, BasicCase) {
-  threadsafe_queue<int> t_queue;
+  ThreadsafeQueue<int> t_queue;
   int num_of_items(100);
 
   EXPECT_TRUE(t_queue.Empty());
