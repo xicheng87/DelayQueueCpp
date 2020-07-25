@@ -14,6 +14,14 @@ cc_library(
 )
 
 cc_library(
+    name = "threadpool",
+    hdrs = ["threadpool.h"],
+    srcs = ["threadpool.cc"],
+    visibility = ["//visibility:public"],
+    deps = ["threadsafe_queue"]
+)
+
+cc_library(
     name = "delay_queue",
     hdrs = ["delay_queue.h"],
     visibility = ["//visibility:public"],
