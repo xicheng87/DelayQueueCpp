@@ -23,6 +23,8 @@ cc_test(
 cc_test(
     name = "threadsafe_queue_unit_test",
     srcs = ["threadsafe_queue_unit_test.cc"],
+    args = ["--gtest_repeat=100"],
+    size = "small",
     deps = [
       "//src:threadsafe_queue",  
       "@com_google_test//:gtest_main",
