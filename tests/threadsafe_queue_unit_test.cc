@@ -29,6 +29,14 @@ void producuer_consumer_test(int num_producer, int num_consumer) {
     }));
   }
 
+  // Join the producer threads, and clean up the threads vector. This makes
+  // the testing more deterministic as this ensures that there are a designated
+  // number of items in the queue at this point.  
+  for (auto& t : threads) {
+    t.join();
+  }
+  threads.clear();
+
   for (int i = 0; i < num_consumer; i++) {
     threads.push_back(std::thread([i, less_producer, 
                                    &t_queue, &num_try_pop_fail] () {
