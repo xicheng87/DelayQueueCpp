@@ -16,6 +16,15 @@ int test_add(int a, int b) {
   return a + b;
 }
 
+// A simple class used to test that one can bind a class member function and
+// submit it to the thread pool
+class Foo {
+ public:
+  int Add(int a, int b) {
+    return a + b;
+  }
+};
+
 class ThreadPoolUnitTest : public ::testing::Test {
  protected:
   ThreadPool threadpool_;
@@ -32,6 +41,23 @@ class ThreadPoolUnitTest : public ::testing::Test {
     for (int i = 0; i < num_tasks; i++) {
       EXPECT_EQ(add_futures[i].get(), 2 * i + 1);
     }
+  }
+
+  // Helper function to run multiple member function as task with a specified
+  // number of repetitions
+  void run_multiple_member_func_add(int num_tasks) {
+    Foo foo;
+    std::vector<std::future<int>> add_futures;
+    for (int i = 0; i < num_tasks; i++) {
+      // For the i-th task, submit a task to add i and i + 1
+      add_futures.push_back(threadpool_.Submit(
+          std::bind(&Foo::Add, &foo , i, i + 1)));
+    }
+
+    for (int i = 0; i < num_tasks; i++) {
+      EXPECT_EQ(add_futures[i].get(), 2 * i + 1);
+    }
+
   }
 };
 
