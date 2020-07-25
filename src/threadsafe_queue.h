@@ -13,7 +13,7 @@
 // This implementation is essentially taken from Anthony D. Williams,
 // "C++ Concurrency in Action", Chapter 6, section 6.2.2
 template <typename T>
-class threadsafe_queue {
+class ThreadsafeQueue {
  public:
   // Push a new value into the queue
   void Push(T new_value) {
