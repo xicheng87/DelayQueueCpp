@@ -80,6 +80,12 @@ class ThreadPool {
     return res;
   }
 
+  // Provide an interface for one to simply submit a FunctionWrapper. This gets
+  // used by the delay queue
+  void Submit(FunctionWrapper&& function_wrapper) {
+    work_queue_.Push(std::move(function_wrapper));
+  }
+
  private:
   // An atomic bool to indicate if the thread pool is still operating
   std::atomic<bool> terminated_;
