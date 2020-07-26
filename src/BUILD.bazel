@@ -18,7 +18,8 @@ cc_library(
     hdrs = ["threadpool.h"],
     srcs = ["threadpool.cc"],
     visibility = ["//visibility:public"],
-    deps = ["threadsafe_queue"]
+    deps = ["semaphore",
+            "threadsafe_queue"]
 )
 
 cc_library(
