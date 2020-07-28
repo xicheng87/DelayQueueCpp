@@ -93,13 +93,15 @@ TEST_F(DelayQueueSmallUnitTest, AddTaskInSequenceMultiThread) {
                             i * 200, 
                             std::bind(&DelayQueueSmallUnitTest::add, 
                                 this, i, i + 1));
+      EXPECT_EQ(task_future[i].get(), 2 * i + 1); 
     }));
   }
 
-  // Wait for tasks to complete 
-  for (int i = 0; i < num_tasks; i++) {
-    EXPECT_EQ(task_future[i].get(), 2 * i + 1);
+  // Join the threads
+  for (auto& t : threads) {
+    t.join();
   }
+  threads.clear();
 
   // Check that the results are showing up in sequence in int_res_queue_
   for (int i = 0; i < num_tasks; i++) {
@@ -108,12 +110,6 @@ TEST_F(DelayQueueSmallUnitTest, AddTaskInSequenceMultiThread) {
     EXPECT_EQ(val, 2 * i + 1);
   }
   EXPECT_TRUE(int_res_queue_.Empty());
-
-  // Join the threads
-  for (auto& t : threads) {
-    t.join();
-  }
-  threads.clear();
 }
 
 // Same scenario as to AddTaskInReverseSequence but have different threads 
@@ -130,13 +126,16 @@ TEST_F(DelayQueueSmallUnitTest, AddTaskInReverseSequenceMultiThread) {
                             (num_tasks - i) * 200, 
                             std::bind(&DelayQueueSmallUnitTest::add, 
                                 this, i, i + 1));
+
+      EXPECT_EQ(task_future[i].get(), 2 * i + 1);
     }));
   }
 
-  // Wait for tasks to complete 
-  for (int i = 0; i < num_tasks; i++) {
-    EXPECT_EQ(task_future[i].get(), 2 * i + 1);
+  // Join the threads
+  for (auto& t : threads) {
+    t.join();
   }
+  threads.clear();
 
   // Check that the results are showing up in sequence in int_res_queue_
   for (int i = num_tasks - 1; i >= 0; i--) {
@@ -145,10 +144,4 @@ TEST_F(DelayQueueSmallUnitTest, AddTaskInReverseSequenceMultiThread) {
     EXPECT_EQ(val, 2 * i + 1);
   }
   EXPECT_TRUE(int_res_queue_.Empty());
-
-  // Join the threads
-  for (auto& t : threads) {
-    t.join();
-  }
-  threads.clear();
 }
