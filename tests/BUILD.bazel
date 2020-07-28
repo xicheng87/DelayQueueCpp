@@ -1,8 +1,20 @@
 load("@rules_cc//cc:defs.bzl", "cc_test")
 
 cc_test(
+    name = "delayqueue_small_unit_test",
+    srcs = ["delayqueue_small_unit_test.cc"],
+    size = "small",
+    deps = [
+      "//src:delay_queue",  
+      "@com_google_test//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "sanity_check",
     srcs = ["sanity_check.cc"],
+    args = ["--gtest_repeat=100"],
+    size = "small",
     deps = [
       "//src:delay_queue",  
       "@com_google_test//:gtest_main",

@@ -20,8 +20,13 @@ ThreadPool::ThreadPool() : terminated_(false) {
 ThreadPool::~ThreadPool() {
   // Set the terminated flag and join the worker threads
   terminated_.store(true);
+  // Notify all worker threads so that they can wake up from wait and terminate
   for(unsigned int i = 0; i < threads_.size(); i++) {
-      threads_[i].join();
+    semaphore_.Notify();
+  }
+  // Join all worker threads
+  for(unsigned int i = 0; i < threads_.size(); i++) {
+    threads_[i].join();
   }
 }
 
@@ -29,6 +34,9 @@ void
 ThreadPool::WorkerThread() {
   // Keep trying pop the task and execute
   while (!terminated_.load()) {
+    // Wait for a submission to wake up and process a task
+    semaphore_.Wait();
+
     FunctionWrapper task;
     if (work_queue_.TryPop(task)) {
       task();

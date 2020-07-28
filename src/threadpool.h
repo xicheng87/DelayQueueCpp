@@ -10,6 +10,7 @@
 #include <thread>
 #include <vector>
 
+#include "src/semaphore.h"
 #include "src/threadsafe_queue.h"
 
 // Definition of a function wrapper that stores the reference to a function.
@@ -77,7 +78,15 @@ class ThreadPool {
     std::packaged_task<result_type()> task(std::move(function));
     std::future<result_type> res(task.get_future());
     work_queue_.Push(std::move(task));
+    semaphore_.Notify();
     return res;
+  }
+
+  // Provide an interface for one to simply submit a FunctionWrapper. This gets
+  // used by the delay queue
+  void Submit(FunctionWrapper&& function_wrapper) {
+    work_queue_.Push(std::move(function_wrapper));
+    semaphore_.Notify();
   }
 
  private:
@@ -87,6 +96,9 @@ class ThreadPool {
   ThreadsafeQueue<FunctionWrapper> work_queue_;
   // All threads
   std::vector<std::thread> threads_;
+  // Use semaphore to synchronize between the commanding thread (main thread 
+  // for ThreadPool) and the worker threads
+  Semaphore semaphore_;
 
   // Function that runs a worker thread
   void WorkerThread();

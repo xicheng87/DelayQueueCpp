@@ -18,12 +18,15 @@ cc_library(
     hdrs = ["threadpool.h"],
     srcs = ["threadpool.cc"],
     visibility = ["//visibility:public"],
-    deps = ["threadsafe_queue"]
+    deps = ["semaphore",
+            "threadsafe_queue"]
 )
 
 cc_library(
     name = "delay_queue",
     hdrs = ["delay_queue.h"],
+    srcs = ["delay_queue.cc"],
     visibility = ["//visibility:public"],
-    deps = ["//src:semaphore"]
+    deps = ["semaphore",
+            "threadpool"]
 )
