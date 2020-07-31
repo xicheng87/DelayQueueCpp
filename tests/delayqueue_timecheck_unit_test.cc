@@ -2,6 +2,7 @@
 // Use of this source code is governed by a Apache License 2.0 that can be
 // found in the LICENSE file.
 #include <chrono>
+#include <ctime>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -44,7 +45,69 @@ struct Task {
 
 class DelayQueueTimeCheckUnitTest : public ::testing::Test {
  protected:
-  DelayQueue delay_queue_; 
+  DelayQueue delay_queue_;
+
+  // Test mode
+  enum TaskInsertSequence {
+    sequential_,
+    reverse_,
+    random_
+  };
+
+  // Helper function to test different scenario for the single thread case. 
+  // This function creates a {num_tasks} number of tasks with an 
+  // {interval_milliseconds} duration apart from each other, and would insert 
+  // the tasks to delay queue according to the pattern specified by {mode}
+  void MultipleTaskTestSingleThread(unsigned int num_tasks, 
+      unsigned int interval_milliseconds, TaskInsertSequence mode) {
+    std::vector<Task> tasks;
+  
+    // Get the task objects initialized
+    for (unsigned int i = 0; i < num_tasks; i++) {
+      tasks.emplace_back(i * interval_milliseconds);
+    }
+
+    // Emit tasks
+    std::vector<std::future<void>> task_futures(num_tasks);
+    switch (mode) {
+      case sequential_:
+        for (unsigned int i = 0; i < num_tasks; i++) {
+          task_futures[i] = delay_queue_.AddTask(tasks[i].delay_milliseconds_,
+                                std::bind(&Task::run, &tasks[i]));
+        }
+        break;
+      case reverse_:
+        for (unsigned int i = 0; i < num_tasks; i++) {
+          task_futures[i] = delay_queue_.AddTask(
+                                tasks[num_tasks - i - 1].delay_milliseconds_,
+                                std::bind(&Task::run, 
+                                    &tasks[num_tasks - i - 1]));
+        }
+        break;
+      case random_:
+        // Use the current time as seed for random generator
+        std::srand(std::time(nullptr));
+        std::vector<int> task_idx;
+        for (unsigned int i = 0; i < num_tasks; i++) {
+          task_idx.push_back(i);
+        }
+        // Randomly shuffle the task to be added to the delay queue
+        for (unsigned int i = 0; i < num_tasks; i++) {
+          int idx = std::rand() % task_idx.size();
+          task_futures[i] = delay_queue_.AddTask(
+                                tasks[task_idx[idx]].delay_milliseconds_,
+                                std::bind(&Task::run, &tasks[task_idx[idx]]));
+          // Remove the task index selected
+          task_idx.erase(task_idx.begin() + idx);
+        }
+        break;
+    }
+
+    // Wait for task to complete
+    for (auto& task_future : task_futures) {
+      task_future.get();
+    }
+  }
 };
 
 // Single task, ensure that the timing is correct
@@ -56,25 +119,17 @@ TEST_F(DelayQueueTimeCheckUnitTest, SingleTask) {
   task_future.get();
 }
 
-// Multiple task, ensure that all timings are correct
-TEST_F(DelayQueueTimeCheckUnitTest, MultipleTask) {
-  std::vector<Task> tasks;
-  int num_tasks(10);
-  
-  // Get the task objects initialized
-  for (int i = 0; i < num_tasks; i++) {
-    tasks.emplace_back(i * 1000);
-  }
- 
-  // Emit tasks
-  std::vector<std::future<void>> task_futures(num_tasks);
-  for (int i = 0; i < num_tasks; i++) {
-    task_futures[i] = delay_queue_.AddTask(tasks[i].delay_milliseconds_,
-                                           std::bind(&Task::run, &tasks[i]));
-  }
+// Test multiple tasks added in sequence
+TEST_F(DelayQueueTimeCheckUnitTest, MultipleTaskSequential) {
+  MultipleTaskTestSingleThread(10, 1000, TaskInsertSequence::sequential_);
+}
 
-  // Wait for task to complete
-  for (auto& task_future : task_futures) {
-    task_future.get();
-  }
+// Test multiple tasks added in reverse sequence
+TEST_F(DelayQueueTimeCheckUnitTest, MultipleTaskReverse) {
+  MultipleTaskTestSingleThread(10, 1000, TaskInsertSequence::reverse_);
+}
+
+// Test multiple tasks added in random order
+TEST_F(DelayQueueTimeCheckUnitTest, MultipleTaskRandom) {
+  MultipleTaskTestSingleThread(10, 1000, TaskInsertSequence::random_);
 }
