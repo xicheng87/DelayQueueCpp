@@ -62,9 +62,11 @@ class FunctionWrapper {
   };
 };
 
-// Definition of a simple thread pool class. This implementation is essentially
-// taken from Anthony D. Williams, "C++ Concurrency in Action", Chapter 9, 
-// section 9.1.1
+// Definition of a simple thread pool class. This implementation is base on 
+// the one presented by Anthony D. Williams, "C++ Concurrency in Action", 
+// Chapter 9, section 9.1.1, but with the modification to use Semaphore to
+// allow worker thread to go to sleep while waiting to be assigned with a 
+// task. This avoids busy waiting problem which burns CPU cycles.  
 class ThreadPool {
  public:
   ThreadPool();
