@@ -49,4 +49,42 @@ bazel test -c dbg ...
 ```
 
 You can go to [Bazel's Official Documentations](https://docs.bazel.build/versions/master/bazel-overview.html)
-to learn more about how to use it. 
+to learn more about how to use it.
+
+# How to use
+
+You should specify a task by wrapping the function and parameters via the `std::bind`
+call. For example, the following code snippet defines a delay queue and add a task to
+execute function `foo` with parameters 1 and 2:
+
+```
+#include "delay_queue.h"
+
+int foo(int a, int b) {
+  return a + b;
+}
+
+DelayQueue delay_queue;
+
+std::future<int> task_future = delay_queue.AddTask(
+                   /* Delay period in milliseconds  */ 1000,
+                   std::bind(&foo, 1, 2));
+
+int res = task_future.get();
+```
+where the first parameter taken by DelayQueue::AddTask is an unsigned integer
+representing the delay period in milliseconds, and the second parameter is a callable
+object returned by `std::bind`. The DelayQueue gaurantees you that it won't start
+execute the specified task after the configured amount of time.  
+
+You can also specify class member functions as tasks. For example, for a class member
+function `Foo::task`, you use `std::bind(&Foo::task, ...)` to create the collable
+object that a delay queue takes.
+
+# Caveat
+
+TBD
+
+# References
+
+TBD
